@@ -428,47 +428,8 @@ TEST(example_guard)
 };
 
 
-TEST(example_ref)
-{
-  using namespace std;
-  int i = 1;
-  int j = 2;
-  optional<int&> ora;                 // disengaged optional reference to int
-  optional<int&> orb = i;             // contained reference refers to object i
-
-  *orb = 3;                          // i becomes 3
-  // FAILS: ora = j;                           // ERROR: optional refs do not have assignment from T
-  // FAILS: ora = {j};                         // ERROR: optional refs do not have copy/move assignment
-  // FAILS: ora = orb;                         // ERROR: no copy/move assignment
-  ora.emplace(j);                    // OK: contained reference refers to object j
-  ora.emplace(i);                    // OK: contained reference now refers to object i
-
-  ora = nullopt;                        // OK: ora becomes disengaged
-};
-
-
-template <typename T>
-T getValue( std::optional<T> newVal = std::nullopt, std::optional<T&> storeHere = std::nullopt )
-{
-  T cached{};
-
-  if (newVal) {
-    cached = *newVal;
-
-    if (storeHere) {
-      *storeHere = *newVal; // LEGAL: assigning T to T
-    }
-  }
-  return cached;
-}
-
 TEST(example_optional_arg)
 {
-  int iii = 0;
-  iii = getValue<int>(iii, iii);
-  iii = getValue<int>(iii);
-  iii = getValue<int>();
-
   {
     using namespace std;
     optional<Guard> grd1{in_place, "res1", 1};   // guard 1 initialized
@@ -499,13 +460,6 @@ std::optional<char> readNextChar(){ return{}; }
 void run(std::optional<std::string>) {}
 void run(std::complex<double>) {}
 
-
-template <class T>
-void assign_norebind(std::optional<T&>& optref, T& obj)
-{
-  if (optref) *optref = obj;
-  else        optref.emplace(obj);
-}
 
 
 
@@ -570,11 +524,6 @@ TEST(example_rationale)
   o = make_optional(1);         // copy/move assignment
   o = 1;           // assignment from T
   o.emplace(1);    // emplacement
-
-  ////////////////////////////////////
-  int isas = 0, i = 9;
-  optional<int&> asas = i;
-  assign_norebind(asas, isas);
 
   /////////////////////////////////////
   ////std::optional<std::vector<int>> ov2 = {2, 3};
@@ -771,13 +720,6 @@ TEST(bad_relops)
 
   assert (oa < b);
   assert (oa > b);
-
-  optional<BadRelops&> ra = a, rb = b;
-  assert (ra < rb);
-  assert (!(ra > rb));
-
-  assert (ra < b);
-  assert (ra > b);
 };
 
 
@@ -871,122 +813,10 @@ TEST(safe_value)
     catch (bad_optional_access const&) {
     }
 
-    { // ref variant
-      int i1 = 1;
-      optional<int&> orN{}, or1{i1};
-
-      int& r2 = or1.value();
-      assert (r2 == 1);
-
-      try {
-        orN.value();
-        assert (false);
-      }
-      catch (bad_optional_access const&) {
-      }
-    }
   }
   catch(...) {
     assert (false);
   }
-};
-
-TEST(optional_ref)
-{
-  using namespace std;
-  // FAILS: optional<int&&> orr;
-  // FAILS: optional<nullopt_t&> on;
-  int i = 8;
-  optional<int&> ori;
-  assert (!ori);
-  ori.emplace(i);
-  assert (bool(ori));
-  assert (*ori == 8);
-  assert (&*ori == &i);
-  *ori = 9;
-  assert (i == 9);
-
-  // FAILS: int& ir = ori.value_or(i);
-  int ii = ori.value_or(i);
-  assert (ii == 9);
-  ii = 7;
-  assert (*ori == 9);
-
-  int j = 22;
-  auto&& oj = make_optional(std::ref(j));
-  *oj = 23;
-  assert (&*oj == &j);
-  assert (j == 23);
-};
-
-TEST(optional_ref_const_propagation)
-{
-  using namespace std;
-
-  int i = 9;
-  const optional<int&> mi = i;
-  int& r = *mi;
-  optional<const int&> ci = i;
-  static_assert(std::is_same<decltype(*mi), int&>::value, "WTF");
-  static_assert(std::is_same<decltype(*ci), const int&>::value, "WTF");
-
-  r = r;
-};
-
-TEST(optional_ref_assign)
-{
-  using namespace std;
-
-  int i = 9;
-  optional<int&> ori = i;
-
-  int j = 1;
-  ori = optional<int&>{j};
-  ori = {j};
-  // FAILS: ori = j;
-
-  optional<int&> orx = ori;
-  ori = orx;
-
-  optional<int&> orj = j;
-
-  assert (ori);
-  assert (*ori == 1);
-  assert (ori == orj);
-  assert (i == 9);
-
-  *ori = 2;
-  assert (*ori == 2);
-  assert (ori == 2);
-  assert (2 == ori);
-  assert (ori != 3);
-
-  assert (ori == orj);
-  assert (j == 2);
-  assert (i == 9);
-
-  ori = {};
-  assert (!ori);
-  assert (ori != orj);
-  assert (j == 2);
-  assert (i == 9);
-};
-
-
-TEST(optional_ref_swap)
-{
-  using namespace std;
-  int i = 0;
-  int j = 1;
-  optional<int&> oi = i;
-  optional<int&> oj = j;
-
-  assert (&*oi == &i);
-  assert (&*oj == &j);
-
-  swap(oi, oj);
-  assert (&*oi == &j);
-  assert (&*oj == &i);
 };
 
 TEST(optional_initialization)
@@ -1098,38 +928,6 @@ TEST(moved_on_value_or)
 # endif
 
 
-TEST(optional_ref_hashing)
-{
-    using namespace std;
-    using std::string;
-
-    std::hash<int> hi;
-    std::hash<optional<int&>> hoi;
-    std::hash<string> hs;
-    std::hash<optional<string&>> hos;
-
-    int i0 = 0;
-    int i1 = 1;
-    assert (hi(0) == hoi(optional<int&>{i0}));
-    assert (hi(1) == hoi(optional<int&>{i1}));
-
-    string s{""};
-    string s0{"0"};
-    string sCAT{"CAT"};
-    assert (hs("") == hos(optional<string&>{s}));
-    assert (hs("0") == hos(optional<string&>{s0}));
-    assert (hs("CAT") == hos(optional<string&>{sCAT}));
-
-    std::unordered_set<optional<string&>> set;
-    assert(set.find({sCAT}) == set.end());
-
-    set.insert({s0});
-    assert(set.find({sCAT}) == set.end());
-
-    set.insert({sCAT});
-    assert(set.find({sCAT}) != set.end());
-};
-
 struct Combined
 {
   int m = 0;
@@ -1164,41 +962,6 @@ TEST(arrow_operator)
   assert (on);
   assert (on->m == 1);
   assert (on->n == 2);
-};
-
-TEST(arrow_wit_optional_ref)
-{
-  using namespace std;
-
-  Combined c{1, 2};
-  optional<Combined&> oc = c;
-  assert (oc);
-  assert (oc->m == 1);
-  assert (oc->n == 2);
-
-  Nasty n{1, 2};
-  Nasty m{3, 4};
-  Nasty p{5, 6};
-
-  optional<Nasty&> on{n};
-  assert (on);
-  assert (on->m == 1);
-  assert (on->n == 2);
-
-  on = {m};
-  assert (on);
-  assert (on->m == 3);
-  assert (on->n == 4);
-
-  on.emplace(p);
-  assert (on);
-  assert (on->m == 5);
-  assert (on->n == 6);
-
-  optional<Nasty&> om{in_place, n};
-  assert (om);
-  assert (om->m == 1);
-  assert (om->n == 2);
 };
 
 
@@ -1299,37 +1062,6 @@ static_assert( g2 != g0, "eq!" );
 
 constexpr std::optional<Combined> gc0{std::in_place};
 static_assert(gc0->n == 6, "WTF!");
-
-// optional refs
-int gi = 0;
-constexpr std::optional<int&> gori = gi;
-constexpr std::optional<int&> gorn{};
-constexpr int& gri = *gori;
-static_assert(gori, "WTF");
-static_assert(!gorn, "WTF");
-static_assert(gori != std::nullopt, "WTF");
-static_assert(gorn == std::nullopt, "WTF");
-static_assert(&gri == &*gori, "WTF");
-
-constexpr int gci = 1;
-constexpr std::optional<int const&> gorci = gci;
-constexpr std::optional<int const&> gorcn{};
-
-static_assert(gorcn <  gorci, "WTF");
-static_assert(gorcn <= gorci, "WTF");
-static_assert(gorci == gorci, "WTF");
-static_assert(*gorci == 1, "WTF");
-static_assert(gorci == gci, "WTF");
-
-namespace constexpr_optional_ref_and_arrow
-{
-  using namespace std;
-  constexpr Combined c{1, 2};
-  constexpr optional<Combined const&> oc = c;
-  static_assert(oc, "WTF!");
-  static_assert(oc->m == 1, "WTF!");
-  static_assert(oc->n == 2, "WTF!");
-}
 
 // end constexpr tests
 

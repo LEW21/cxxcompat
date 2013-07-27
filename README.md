@@ -3,6 +3,10 @@ cxxcompat
 
 C++ compatibility header-only library. Implements as much of C++11/14 as is possible without compiler help.
 
+Implemented C++ version
+-----------------------
+The plan is to always implement the latest working draft of C++. Currently, this is [N3690](http://isocpp.org/files/papers/N3690.pdf) - C++14 committee draft from 2013-05-15.
+
 Supported compilers
 -------------------
 - clang 3.2+
