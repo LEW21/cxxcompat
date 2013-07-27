@@ -14,7 +14,6 @@
 #include <complex>
 
 
-
 struct caller {
     template <class T> caller(T fun) { fun(); }
 };
@@ -294,6 +293,7 @@ TEST(optional_optional)
   //std::cout << typeid(**oi2).name() << std::endl;
   }
 
+# if !GCC_LT_(4,7,0) // Compiler error
   {
   std::optional<std::optional<int>> oi2 {std::in_place, std::nullopt};
   assert (oi2 != std::nullopt);
@@ -301,6 +301,7 @@ TEST(optional_optional)
   assert (*oi2 == std::nullopt);
   assert (!*oi2);
   }
+# endif
 
   {
   std::optional<std::optional<int>> oi2 {std::optional<int>{}};
@@ -572,7 +573,9 @@ TEST(example_rationale)
   {
   typedef int T;
   optional<optional<T>> ot {in_place};
+# if !GCC_LT_(4,7,0) // Compiler error
   optional<optional<T>> ou {in_place, nullopt};
+# endif
   optional<optional<T>> ov {optional<T>{}};
 
   optional<int> oi;
@@ -876,6 +879,7 @@ struct generic<U&>
   typedef std::reference_wrapper<U> type;
 };
 
+# if CXXCOMPAT_HAS_ALIAS_TEMPLATES
 template <class T>
 using Generic = typename generic<T>::type;
 
@@ -901,7 +905,7 @@ TEST(optional_ref_emulation)
   *ori = j;
   assert (*ori == 4);
 };
-
+# endif
 
 # if CXXCOMPAT_HAS_THIS_RVALUE_REFS
 TEST(moved_on_value_or)
@@ -927,7 +931,7 @@ TEST(moved_on_value_or)
 };
 # endif
 
-
+# if CXXCOMPAT_HAS_NONSTATC_MEMBER_INIT
 struct Combined
 {
   int m = 0;
@@ -963,10 +967,10 @@ TEST(arrow_operator)
   assert (on->m == 1);
   assert (on->n == 2);
 };
-
+# endif
 
 //// constexpr tests
-
+# if CXXCOMPAT_HAS_ALIAS_TEMPLATES // our constexpr implementation depends on CXXCOMPAT_HAS_ALIAS_TEMPLATES
 // these 4 classes have different noexcept signatures in move operations
 struct NothrowBoth {
   NothrowBoth(NothrowBoth&&) noexcept(true) {};
@@ -1062,7 +1066,7 @@ static_assert( g2 != g0, "eq!" );
 
 constexpr std::optional<Combined> gc0{std::in_place};
 static_assert(gc0->n == 6, "WTF!");
-
+# endif
 // end constexpr tests
 
 
