@@ -11,12 +11,15 @@
 
 namespace std
 {
-	# if !(GCC(4,8,0) || CLANG(3,3,0)) && CXXCOMPAT_HAS_ALIAS_TEMPLATES
+# if LIBCXX_LT_(2,9,0) || LIBSTDCXX_LT_(4,8,0)
+// libcxx change: http://llvm.org/viewvc/llvm-project/libcxx/trunk/include/type_traits?r1=119854&r2=119853
+// (Minimum version number determined by the commit date and clang's release date.)
+	# if CXXCOMPAT_HAS_ALIAS_TEMPLATES
 		template <class T>
 		using is_trivially_destructible = typename std::has_trivial_destructor<T>;
 	# endif
 
-	# if !(GCC(4,7,0) || CLANG(1,0,0)) // TODO determine minimum clang version requiring them
+	# if LIBSTDCXX_LT_(4,7,0)
 		template <class T>
 		struct is_nothrow_move_constructible
 		{
@@ -51,4 +54,5 @@ namespace std
 			constexpr static bool value = has_nothrow_move_assign<T, is_assignable<T&, T&&>::value>::value;
 		};
 	# endif
+# endif
 }

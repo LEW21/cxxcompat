@@ -1,5 +1,9 @@
 #pragma once
 
+#include <exception>
+// Why? We need any Standard Library's header, to be able to determine its version.
+// And this is one of the most basic ones.
+
 # ifndef __has_feature
 #  define __has_feature(x) 0
 # endif
@@ -12,6 +16,59 @@
 
 # define CLANG(x, y, z) (CLANG_VER && CLANG_VER >= ((x * 10000) + (y * 100) + z))
 # define GCC(x, y, z)   (GCC_VER   && GCC_VER   >= ((x * 10000) + (y * 100) + z))
+
+# if defined __GLIBCXX__
+#  if !(defined LIBSTDCXX)
+#   if defined GCC_VER
+#    define LIBSTDCXX GCC_VER
+#   else
+#    warning You should provide libstdc++ version by defining LIBSTDCXX. Assuming newest existing...
+#    define LIBSTDCXX 99999
+#   endif
+#  endif
+# else
+#  undef LIBSTDCXX
+# endif
+
+# if defined _LIBCPP_VERSION
+#  if !(defined LIBCXX)
+#   if defined CLANG_VER
+#    define LIBCXX CLANG_VER
+#   else // TODO determine version using _LIBCPP_VERSION... No idea what 1101 means...
+#    warning You need to provide libc++ version by defining LIBCXX. Assuming newest existing...
+#    define LIBCXX 99999
+#   endif
+#  endif
+# else
+#  undef LIBCXX
+# endif
+
+# if (defined LIBSTDCXX) && (defined LIBCXX)
+#  error You have achieved the impossible - mixed libstdc++ and libc++ in some way...
+# elif !(defined LIBSTDCXX) && !(defined LIBCXX)
+#  error libstdc++ or libc++ required.
+# endif
+
+# define VERSION_GTE_(VER, x,y,z) (VER && VER >= ((x * 10000) + (y * 100) + z))
+# define VERSION_GT_(VER,  x,y,z) (VER && VER >  ((x * 10000) + (y * 100) + z))
+# define VERSION_LTE_(VER, x,y,z) (VER && VER <= ((x * 10000) + (y * 100) + z))
+# define VERSION_LT_(VER,  x,y,z) (VER && VER <  ((x * 10000) + (y * 100) + z))
+# define VERSION_E_(VER,   x,y,z) (VER && VER =  ((x * 10000) + (y * 100) + z))
+# define VERSION_NE_(VER,  x,y,z) (VER && VER != ((x * 10000) + (y * 100) + z))
+
+# define LIBSTDCXX_GTE_(x,y,z) VERSION_GTE_(LIBSTDCXX, x,y,z)
+# define LIBSTDCXX_GT_(x,y,z)  VERSION_GT_ (LIBSTDCXX, x,y,z)
+# define LIBSTDCXX_LTE_(x,y,z) VERSION_LTE_(LIBSTDCXX, x,y,z)
+# define LIBSTDCXX_LT_(x,y,z)  VERSION_LT_ (LIBSTDCXX, x,y,z)
+# define LIBSTDCXX_E_(x,y,z)   VERSION_E_  (LIBSTDCXX, x,y,z)
+# define LIBSTDCXX_NE_(x,y,z)  VERSION_NE_ (LIBSTDCXX, x,y,z)
+
+# define LIBCXX_GTE_(x,y,z) VERSION_GTE_(LIBCXX, x,y,z)
+# define LIBCXX_GT_(x,y,z)  VERSION_GT_ (LIBCXX, x,y,z)
+# define LIBCXX_LTE_(x,y,z) VERSION_LTE_(LIBCXX, x,y,z)
+# define LIBCXX_LT_(x,y,z)  VERSION_LT_ (LIBCXX, x,y,z)
+# define LIBCXX_E_(x,y,z)   VERSION_E_  (LIBCXX, x,y,z)
+# define LIBCXX_NE_(x,y,z)  VERSION_NE_ (LIBCXX, x,y,z)
 
 # if __has_feature(cxx_alias_templates) || GCC(4,7,0)
 #  define CXXCOMPAT_HAS_ALIAS_TEMPLATES 1
