@@ -16,6 +16,8 @@ set(CMAKE_CXX_FLAGS "-std=c++1y -Wall -Wextra -I${CMAKE_CURRENT_SOURCE_DIR}/incl
 
 add_executable(test_type_traits tests/test_type_traits.cxx)
 add_executable(test_optional tests/test_optional.cxx)
+add_executable(test_memory tests/test_memory.cxx)
 
 add_test(test_type_traits test_type_traits)
 add_test(test_optional test_optional)
+add_test(test_memory test_memory)
