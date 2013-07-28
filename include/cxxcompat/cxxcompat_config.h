@@ -95,6 +95,12 @@
 #  define CXXCOMPAT_HAS_NONSTATC_MEMBER_INIT 0
 # endif
 
+# if __has_feature(cxx_user_literals) || GCC_GTE_(4,7,0)
+#  define CXXCOMPAT_HAS_USER_LITERALS 1
+# else
+#  define CXXCOMPAT_HAS_USER_LITERALS 0
+# endif
+
 # if __has_feature(cxx_rvalue_references) || GCC_GTE_(4,8,1)
 #  define CXXCOMPAT_HAS_THIS_RVALUE_REFS 1
 # else

@@ -11,7 +11,7 @@
 
 namespace std
 {
-# if !LIBCXX_GT_(3,3,0)
+# if !(LIBCXX_GT_(3,3,0) && _LIBCPP_STD_VER > 11)
 // libcxx change: http://llvm.org/viewvc/llvm-project/libcxx/trunk/include/memory?r1=183481&r2=185352
 	template<class _Tp>
 	struct __unique_if
