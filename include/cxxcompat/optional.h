@@ -1,7 +1,7 @@
 // Copyright (C) 2011 - 2012 Andrzej Krzemienski.
 //
 // Use, modification, and distribution is subject to the Boost Software
-// License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+// License, Version 1.0. (See accompanying file licenses/Boost.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 // The idea and interface is based on Boost.Optional library
