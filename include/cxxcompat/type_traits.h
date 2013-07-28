@@ -11,48 +11,46 @@
 
 namespace std
 {
-# if LIBCXX_LT_(2,9,0) || LIBSTDCXX_LT_(4,8,0)
-// libcxx change: http://llvm.org/viewvc/llvm-project/libcxx/trunk/include/type_traits?r1=119854&r2=119853
-// (Minimum version number determined by the commit date and clang's release date.)
+# if LIBSTDCXX_LT_(4,8,0)
 	# if CXXCOMPAT_HAS_ALIAS_TEMPLATES
 		template <class T>
 		using is_trivially_destructible = typename std::has_trivial_destructor<T>;
 	# endif
+# endif
 
-	# if LIBSTDCXX_LT_(4,7,0)
-		template <class T>
-		struct is_nothrow_move_constructible
-		{
-			constexpr static bool value = std::is_nothrow_constructible<T, T&&>::value;
+# if LIBSTDCXX_LT_(4,7,0)
+	template <class T>
+	struct is_nothrow_move_constructible
+	{
+		constexpr static bool value = std::is_nothrow_constructible<T, T&&>::value;
+	};
+
+	template <class T, class U>
+	struct is_assignable
+	{
+		template <class X, class Y>
+		static constexpr bool has_assign(...) { return false; }
+
+		template <class X, class Y, size_t S = sizeof(std::declval<X>() = std::declval<Y>()) >
+		static constexpr bool has_assign(bool) { return true; }
+
+		constexpr static bool value = has_assign<T, U>(true);
+	};
+
+	template <class T>
+	struct is_nothrow_move_assignable
+	{
+		template <class X, bool has_any_move_massign>
+		struct has_nothrow_move_assign {
+			constexpr static bool value = false;
 		};
 
-		template <class T, class U>
-		struct is_assignable
-		{
-			template <class X, class Y>
-			static constexpr bool has_assign(...) { return false; }
-
-			template <class X, class Y, size_t S = sizeof(std::declval<X>() = std::declval<Y>()) >
-			static constexpr bool has_assign(bool) { return true; }
-
-			constexpr static bool value = has_assign<T, U>(true);
+		template <class X>
+		struct has_nothrow_move_assign<X, true> {
+			constexpr static bool value = noexcept( std::declval<X&>() = std::declval<X&&>() );
 		};
 
-		template <class T>
-		struct is_nothrow_move_assignable
-		{
-			template <class X, bool has_any_move_massign>
-			struct has_nothrow_move_assign {
-				constexpr static bool value = false;
-			};
-
-			template <class X>
-			struct has_nothrow_move_assign<X, true> {
-				constexpr static bool value = noexcept( std::declval<X&>() = std::declval<X&&>() );
-			};
-
-			constexpr static bool value = has_nothrow_move_assign<T, is_assignable<T&, T&&>::value>::value;
-		};
-	# endif
+		constexpr static bool value = has_nothrow_move_assign<T, is_assignable<T&, T&&>::value>::value;
+	};
 # endif
 }

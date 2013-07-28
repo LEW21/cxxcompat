@@ -4,7 +4,7 @@
 
 # include "cxxcompat_config.h"
 
-# if CLANG_LT_(3,0,0) || GCC_LT_(4,7,0)
+# if GCC_LT_(4,7,0)
 // It's impossible to get override-checking in the compiler,
 // so at least stop it from screaming.
 #  ifndef override

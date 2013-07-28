@@ -83,6 +83,22 @@
 # define LIBCXX_E_(x,y,z)   VERSION_E_  (LIBCXX, x,y,z)
 # define LIBCXX_NE_(x,y,z)  VERSION_NE_ (LIBCXX, x,y,z)
 
+# if GCC_LT_(4,6,0)
+#  error gcc < 4.6 is not supported.
+# endif
+
+# if CLANG_LT_(3,0,0)
+#  error clang < 3.0 is not supported.
+# endif
+
+# if LIBSTDCXX_LT_(4,6,0)
+#  error libstdc++ < 4.6 is not supported.
+# endif
+
+# if LIBCXX_LT_(3,0,0)
+#  error libc++ < 3.0 is not supported.
+# endif
+
 # if __has_feature(cxx_alias_templates) || GCC_GTE_(4,7,0)
 #  define CXXCOMPAT_HAS_ALIAS_TEMPLATES 1
 # else
