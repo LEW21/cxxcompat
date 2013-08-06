@@ -54,3 +54,5 @@ namespace std
 	};
 # endif
 }
+
+# include "type_traits_cxx14.h"

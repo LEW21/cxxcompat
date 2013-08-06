@@ -46,4 +46,8 @@ static_assert(!std::is_assignable<Val&, Val&&>::value, "WTF!");
 static_assert(std::is_nothrow_move_assignable<Safe>::value, "WTF!");
 static_assert(!std::is_nothrow_move_assignable<Unsafe>::value, "WTF!");
 
-int main() { }
+# if CXXCOMPAT_HAS_ALIAS_TEMPLATES
+std::enable_if_t<true, int> main() { }
+# else
+int main() {}
+# endif
