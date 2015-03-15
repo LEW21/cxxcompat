@@ -8,8 +8,9 @@
 
 namespace std
 {
-# if !(LIBCXX_GTE_(3,4,0) && _LIBCPP_STD_VER > 11)
+# if !(LIBCXX_GTE_(3,4,0) && _LIBCPP_STD_VER > 11) && !(LIBSTDCXX_GTE_(4,9,0))
 // libcxx change: http://llvm.org/viewvc/llvm-project/libcxx/trunk/include/type_traits?r1=181935&r2=185597
+// libstdcxx change: https://github.com/gcc-mirror/gcc/commit/2cff5b9abfc42719de21380cc95325483c4d4391
 #  if CXXCOMPAT_HAS_ALIAS_TEMPLATES
 	// const-volatile modifications:
 	template <class T>
